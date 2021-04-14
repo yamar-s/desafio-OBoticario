@@ -6,20 +6,24 @@ const vendaDAO = {
   CodigoRevendedor: 0,
   Valor: 0.0,
   Status: "EmValidacao",
-  Data: new Date(),
+  Data: "",
   CPF: 0,
-  FormaPagamento: "",
+  ValorCashBack: 0.0,
+  PorcentagemCashBack: 0.0,
+  Id: "",
 
   init: (venda) => {
     if (!venda) {
       return vendaDAO;
     }
+    vendaDAO.Id = venda.Id;
     vendaDAO.CodigoRevendedor = venda.CodigoRevendedor;
     vendaDAO.Valor = venda.Valor;
-    vendaDAO.Status = venda.Status ? venda.Status : 'EmValidacao';
-    vendaDAO.Data = venda.Data
+    vendaDAO.Status = venda.Status ? venda.Status : "EmValidacao";
+    vendaDAO.Data = venda.Data;
     vendaDAO.CPF = venda.CPF;
-    vendaDAO.FormaPagamento = venda.FormaPagamento;
+    vendaDAO.ValorCashBack = venda.ValorCashBack;
+    vendaDAO.PorcentagemCashBack = venda.PorcentagemCashBack;
     return vendaDAO;
   },
   // create: () => {
@@ -37,21 +41,9 @@ const vendaDAO = {
   // },
   create: () => {
     return dbConn.query("INSERT INTO tblvenda set ?", vendaDAO);
-    
   },
-  findById: (id, result) => {
-    dbConn.query(
-      "Select * from tblvenda where codigo = ? ",
-      id,
-      function (err, res) {
-        if (err) {
-          console.log("error: ", err);
-          result(err, null);
-        } else {
-          result(null, res);
-        }
-      }
-    );
+  findById: (Id) => {
+    return dbConn.query("Select * from tblvenda where ? ", { Id });
   },
   findAll: () => {
     return dbConn.execute("SELECT * FROM tblvenda");
@@ -86,7 +78,7 @@ const vendaDAO = {
   },
   delete: (id, result) => {
     dbConn.query(
-      "DELETE FROM tblrevendedor WHERE codigo = ?",
+      "DELETE FROM tblvenda WHERE codigo = ?",
       [id],
       function (err, res) {
         if (err) {
