@@ -36,23 +36,19 @@ const revendedorDAO = {
     revendedorDAO.DataCriacao = revendedor.DataCriacao;
     return revendedorDAO;
   },
-  create: (novoRevendedor) => {
-    dbConn.query(
-      "INSERT INTO tblrevendedor set ?",
-      novoRevendedor,
-      function (err, res) {
-        if (err) {
-          console.log("error: ", err);
-          return res;
-        } else {
-          console.log(res.codigo);
-          return res;
-        }
-      }
-    );
+  create: () => {
+    return dbConn.query("INSERT INTO tblrevendedor set ?", revendedorDAO);
   },
-  findByCode:async (Codigo) => {
-  return await  dbConn.query("SELECT * from tblrevendedor where ? ", {Codigo});
+  findByCode: async (Codigo) => {
+    return await dbConn.query("SELECT * from tblrevendedor where ? ", {
+      Codigo,
+    });
+  },
+  findByLogin: async (Email, Senha) => {
+    return await dbConn.query(
+      "SELECT * from tblrevendedor where  `Email` = ? AND `Senha` = ?  ",
+      [Email, Senha]
+    );
   },
   findAll: async () => {
     return await dbConn.execute("SELECT * FROM tblrevendedor");
