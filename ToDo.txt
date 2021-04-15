@@ -1,16 +1,6 @@
 
-☺Criar campos no banco de dados referentes ao cashBack (valor e porcentagem)
-☺Aplicar regra no endpoint de criação de venda
-• Ajustar listagem das compras cadastradas retornando  % de cashback
-aplicado para esta compra, valor de cashback para esta compra;
-Atualizar testes para rota de listagem de vendas
-• Rota para cadastrar um novo revendedor(a) exigindo no mínimo nome completo, CPF, email e senha;
-Criar testes para rota de cadastro
-• Rota para validar um login de um revendedor(a);
-Criar testes para rota de login
-• Rota para editar uma compra, permitir editar apenas se o status da venda for “Em 
-validação”;
-Criar testes para rota de edição de compra
+Criar testes para rota de cadastro revendedor
+Criar testes para rota de login revendedor
 • Rota para excluir uma compra, permitir exclusão apenas se o status da venda for “Em 
 validação”;
 Criar testes para rota de exclusão

@@ -1,7 +1,5 @@
 const express = require("express");
 const md5 = require("md5");
-const rvsmd5 = require("reverse-md5");
-
 const router = express.Router();
 const revendedorDAO = require("../models/revendedor.model");
 
@@ -13,7 +11,12 @@ router.get("/revendedor", async function (req, res, next) {
 
 router.get("/revendedor/:codigo", async function (req, res, next) {
   const revendedor = revendedorDAO.init();
-  const [rows] = await revendedor.findByCode(req.params.codigo);
+  const [[rows]] = await revendedor.findByCode(req.params.codigo);
+
+  if (!rows) {
+    res.send("Revendedor não existe");
+  }
+
   res.send(rows);
 });
 
@@ -28,11 +31,15 @@ router.post("/revendedor/cadastro", async function (req, res, next) {
     res.statusCode = 400;
     res.send("Verifique os dados enviados");
   }
+  const [[rows]] = await revendedor.findByCPF(req.body.CPF);
+  if (rows) {
+    res.statusCode = 400;
+    res.send("CPF Já cadastrado");
+  }
 
-  revendedor.Senha = md5(revendedor.Senha);  
+  revendedor.Senha = md5(revendedor.Senha);
+  revendedor.DataCriacao = new Date().toISOString().split("Z")[0];
 
-  console.log(new Date().toISOString().split('Z')[0])
-  revendedor.DataCriacao = new Date().toISOString().split('Z')[0]
   try {
     await revendedor.create();
     res.statusCode = 201;
@@ -49,19 +56,14 @@ router.post("/revendedor/login", async function (req, res, next) {
     res.send("Os campos de email e senha são obrigatórios");
   }
 
-  if (revendedor.Senha) {
-    revendedor.Senha = md5(revendedor.Senha);
-  }
+  revendedor.Senha = md5(revendedor.Senha);
 
   try {
-    console.log(revendedor);
-
     const [rows] = await revendedor.findByLogin(
-      revendedor.Email,
-      revendedor.Senha
+      revendedor
     );
-    console.log(rows);
-    if (rows.length && rows.length > 0) {
+
+    if (rows.length) {
       res.statusCode = 200;
       res.send("Criado com sucesso");
     }
