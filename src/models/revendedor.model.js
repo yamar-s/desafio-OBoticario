@@ -44,7 +44,12 @@ const revendedorDAO = {
       Codigo,
     });
   },
-  findByLogin: async (Email, Senha) => {
+  findByCPF: async (CPF) => {
+    return await dbConn.query("SELECT * from tblrevendedor where ? ", {
+      CPF,
+    });
+  },
+  findByLogin: async ({Email, Senha}) => {
     return await dbConn.query(
       "SELECT * from tblrevendedor where  `Email` = ? AND `Senha` = ?  ",
       [Email, Senha]

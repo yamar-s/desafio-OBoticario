@@ -39,8 +39,8 @@ const vendaDAO = {
   //     console.log(query.sql)
   //   );
   // },
-  create: () => {
-    return dbConn.query("INSERT INTO tblvenda set ?", vendaDAO);
+  create: (newVenda) => {
+    return dbConn.query("INSERT INTO tblvenda set ?", newVenda);
   },
   findById: (Id) => {
     return dbConn.query("Select * from tblvenda where ? ", { Id });
@@ -48,47 +48,11 @@ const vendaDAO = {
   findAll: () => {
     return dbConn.execute("SELECT * FROM tblvenda");
   },
-  update: (codigo, revendedor, result) => {
-    dbConn.query(
-      "UPDATE tblrevendedor SET NomeCompleto=?,CPF=?,Email=?,Codigo=?,Senha=?,Genero=?,Celular=?,Endereco=?,Bairro=?,UF=?,CEP=?,Cidade=? WHERE CPF = ?",
-      [
-        revendedor.NomeCompleto,
-        revendedor.CPF,
-        revendedor.Email,
-        revendedor.Codigo,
-        revendedor.Senha,
-        revendedor.Genero,
-        revendedor.Celular,
-        revendedor.Endereco,
-        revendedor.Bairro,
-        revendedor.UF,
-        revendedor.CEP,
-        revendedor.Cidade,
-        codigo,
-      ],
-      function (err, res) {
-        if (err) {
-          console.log("error: ", err);
-          result(null, err);
-        } else {
-          result(null, res);
-        }
-      }
-    );
+  update: (Id, newVenda) => {
+    return dbConn.query(`UPDATE tblvenda SET ? Where Id = ${Id}`, newVenda);
   },
-  delete: (id, result) => {
-    dbConn.query(
-      "DELETE FROM tblvenda WHERE codigo = ?",
-      [id],
-      function (err, res) {
-        if (err) {
-          console.log("error: ", err);
-          result(null, err);
-        } else {
-          result(null, res);
-        }
-      }
-    );
+  delete: async (Id) => {
+   return await dbConn.query(`DELETE FROM tblvenda Where Id = ${Id}`);
   },
 };
 

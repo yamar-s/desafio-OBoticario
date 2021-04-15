@@ -1,17 +1,36 @@
-const { request } = require("express");
 const express = require("express");
+const { merge } = require("ramda");
 const router = express.Router();
 const vendaDAO = require("../models/venda.model");
 const revendedorDAO = require("../models/revendedor.model");
 /* GET lista venda. */
 router.get("/vendas", async function (req, res, next) {
-  const vendas = vendaDAO.init();
-  const [rows] = await vendas.findAll();
-  res.send(rows);
+  try {
+    const vendas = vendaDAO.init();
+    const [rows] = await vendas.findAll();
+
+    res.send(rows);
+  } catch (error) {
+    res.statusCode(500);
+    res.send(error);
+  }
+});
+
+router.get("/vendas/:Id", async function (req, res, next) {
+  try {
+    const vendas = vendaDAO.init();
+    const [[rows]] = await vendas.findById(req.params.Id);
+
+    res.send(rows);
+  } catch (error) {
+    res.statusCode(500);
+    res.send(error);
+  }
 });
 
 router.post("/vendas", async function (req, res, next) {
   const vendas = vendaDAO.init(req.body);
+
   if (
     !vendas.CPF ||
     !vendas.CodigoRevendedor ||
@@ -20,51 +39,128 @@ router.post("/vendas", async function (req, res, next) {
   ) {
     res.statusCode = 400;
     res.send("Verifique os dados enviados");
+    return;
   }
 
   if (vendas.CPF === 15350946056) {
     vendas.Status = "Aprovado";
   }
 
-  if (vendas.Valor > 0) {
-    var valor = vendas.Valor;
-
-    switch (true) {
-      case valor <= 1000:
-        vendas.ValorCashBack = percentage(10, valor);
-        vendas.PorcentagemCashBack = 10.0;
-        break;
-      case valor >= 1001 && valor <= 1500:
-        vendas.ValorCashBack = percentage(15, valor);
-        vendas.PorcentagemCashBack = 15.0;
-        break;
-      case valor > 1501:
-        vendas.ValorCashBack = percentage(20, valor);
-        vendas.PorcentagemCashBack = 20.0;
-        break;
-    }
-  }
-
   try {
-    const revendedor = await revendedorDAO.findByCode(vendas.CodigoRevendedor);
+    const newVenda = { ...vendas, ...calcularValorVenda(vendas.Valor) };
+    const revendedor = await revendedorDAO.findByCode(
+      newVenda.CodigoRevendedor
+    );
+
     if (!revendedor.length || !revendedor[0].length) {
       res.statusCode = 403;
       res.send("Revendedor não existe");
+      return;
     }
 
-    const result = await vendas.create();
-    console.log(result[0].insertId);
+    const result = await newVenda.create(newVenda);
+    const [[rows]] = await newVenda.findById(result[0].insertId);
 
-    const [rows] = await vendas.findById(result[0].insertId);
     res.statusCode = 201;
     res.send(rows);
   } catch (error) {
+    res.statusCode(500);
     res.send(error);
   }
 });
 
+router.put("/vendas/editar", async function (req, res, next) {
+  const vendas = vendaDAO.init(req.body);
+
+  if (
+    !vendas.Id ||
+    !vendas.CodigoRevendedor ||
+    !vendas.Data ||
+    !vendas.Valor ||
+    !vendas.Status ||
+    !vendas.CPF
+  ) {
+    res.statusCode = 403;
+    res.send("Informe o objeto de venda");
+    return;
+  }
+
+  try {
+    const [[dbVenda]] = await vendaDAO.findById(vendas.Id);
+
+    if (!dbVenda) {
+      res.statusCode = 403;
+      res.send("Venda não existe");
+      return;
+    }
+
+    if (dbVenda.Status !== "EmValidacao") {
+      res.statusCode = 403;
+      res.send(
+        "A venda não pode ser alterada pois está com o status 'Em validação'"
+      );
+      return;
+    }
+
+    const newVenda = { ...vendas, ...calcularValorVenda(vendas.Valor) };
+
+    await newVenda.update(newVenda.Id, newVenda);
+
+    const [[rows]] = await newVenda.findById(newVenda.Id);
+
+    if (rows) {
+      res.statusCode = 200;
+      res.send(rows);
+      return;
+    }
+  } catch (error) {
+    res.statusCode(500);
+    res.send(error);
+  }
+});
+
+function calcularValorVenda(valor) {
+  if (valor <= 1000) {
+    return { ValorCashBack: percentage(10, valor), PorcentagemCashBack: 10.0 };
+  }
+
+  if (valor >= 1001 && valor <= 1500) {
+    return { ValorCashBack: percentage(15, valor), PorcentagemCashBack: 15.0 };
+  }
+
+  return { ValorCashBack: percentage(20, valor), PorcentagemCashBack: 20.0 };
+}
+
 function percentage(percent, total) {
   return ((percent / 100) * total).toFixed(2);
 }
+
+router.delete("/vendas/excluir/:Id", async function (req, res, next) {
+  const vendas = vendaDAO.init();
+
+  try {
+    const [[rows]] = await vendas.findById(req.params.Id);
+
+    if (!rows) {
+      res.statusCode = 403;
+      res.send("Venda não existe");
+      return;
+    }
+
+    const [result] = await vendas.delete(rows.Id);
+
+    if (!result.affectedRows) {
+      res.statusCode = 500;
+      res.send("Erro ao excluir");
+      return;
+    }
+
+    res.statusCode = 200;
+    res.send("Excluido com sucesso");
+  } catch (error) {
+    res.statusCode(500);
+    res.send(error);
+  }
+});
 
 module.exports = router;

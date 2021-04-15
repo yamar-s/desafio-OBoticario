@@ -8,6 +8,7 @@
     "start": "nodemon server"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
     "debug": "~2.6.9",
@@ -16,6 +17,7 @@
     "morgan": "~1.9.1",
     "mysql2": "^2.2.5",
     "prettier": "^2.2.1",
+    "ramda": "^0.27.1",
     "reverse-md5": "0.0.5",
     "sequelize": "^6.6.2"
   },
