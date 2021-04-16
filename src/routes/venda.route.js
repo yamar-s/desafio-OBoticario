@@ -11,7 +11,7 @@ router.get("/vendas", async function (req, res, next) {
 
     res.send(rows);
   } catch (error) {
-    res.statusCode(500);
+    res.statusCode = 500;
     res.send(error);
   }
 });
@@ -19,11 +19,11 @@ router.get("/vendas", async function (req, res, next) {
 router.get("/vendas/:Id", async function (req, res, next) {
   try {
     const vendas = vendaDAO.init();
-    const [[rows]] = await vendas.findById(req.params.Id);
+    const [[row]] = await vendas.findById(req.params.Id);
 
-    res.send(rows);
+    res.send(row);
   } catch (error) {
-    res.statusCode(500);
+    res.statusCode = 500;
     res.send(error);
   }
 });
@@ -59,12 +59,12 @@ router.post("/vendas", async function (req, res, next) {
     }
 
     const result = await newVenda.create(newVenda);
-    const [[rows]] = await newVenda.findById(result[0].insertId);
+    const [[row]] = await newVenda.findById(result[0].insertId);
 
     res.statusCode = 201;
-    res.send(rows);
+    res.send(row);
   } catch (error) {
-    res.statusCode(500);
+    res.statusCode = 500;
     res.send(error);
   }
 });
@@ -97,7 +97,7 @@ router.put("/vendas/editar", async function (req, res, next) {
     if (dbVenda.Status !== "EmValidacao") {
       res.statusCode = 403;
       res.send(
-        "A venda não pode ser alterada pois está com o status 'Em validação'"
+        "A venda não pode ser alterada pois o status é diferente de 'Em validação'"
       );
       return;
     }
@@ -106,15 +106,15 @@ router.put("/vendas/editar", async function (req, res, next) {
 
     await newVenda.update(newVenda.Id, newVenda);
 
-    const [[rows]] = await newVenda.findById(newVenda.Id);
+    const [[row]] = await newVenda.findById(newVenda.Id);
 
-    if (rows) {
+    if (row) {
       res.statusCode = 200;
-      res.send(rows);
+      res.send(row);
       return;
     }
   } catch (error) {
-    res.statusCode(500);
+    res.statusCode = 500;
     res.send(error);
   }
 });
@@ -139,15 +139,21 @@ router.delete("/vendas/excluir/:Id", async function (req, res, next) {
   const vendas = vendaDAO.init();
 
   try {
-    const [[rows]] = await vendas.findById(req.params.Id);
+    const [[row]] = await vendas.findById(req.params.Id);
 
-    if (!rows) {
+    if (!row) {
       res.statusCode = 403;
       res.send("Venda não existe");
       return;
     }
 
-    const [result] = await vendas.delete(rows.Id);
+    if (row.Status === "Aprovado") {
+      res.statusCode = 403;
+      res.send("A venda não pode ser excluida. Status 'Aprovado'");
+      return;
+    }
+
+    const [result] = await vendas.delete(row.Id);
 
     if (!result.affectedRows) {
       res.statusCode = 500;
@@ -158,7 +164,7 @@ router.delete("/vendas/excluir/:Id", async function (req, res, next) {
     res.statusCode = 200;
     res.send("Excluido com sucesso");
   } catch (error) {
-    res.statusCode(500);
+    res.statusCode = 500;
     res.send(error);
   }
 });

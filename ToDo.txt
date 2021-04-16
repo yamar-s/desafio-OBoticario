@@ -1,8 +1,2 @@
-
-Criar testes para rota de cadastro revendedor
-Criar testes para rota de login revendedor
-• Rota para excluir uma compra, permitir exclusão apenas se o status da venda for “Em 
-validação”;
-Criar testes para rota de exclusão
 • Rota para exibir o acumulado de cashback até o momento, essa rota irá consumir essa 
 informação de uma API externa disponibilizada pelo Boticário.
