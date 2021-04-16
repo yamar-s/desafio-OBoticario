@@ -5,7 +5,7 @@ const revendedorDAO = require("../models/revendedor.model");
 const axios = require("axios");
 router.get("/revendedor/cashback/:CPF", async function (req, res, next) {
   try {
-    const {data} = await axios.get(
+    const { data } = await axios.get(
       "https://mdaqk8ek5j.execute-api.us-east-1.amazonaws.com/v1/cashback",
       {
         params: {
@@ -27,7 +27,12 @@ router.get("/revendedor", async function (req, res, next) {
     const revendedor = revendedorDAO.init();
     const [rows] = await revendedor.findAll();
 
-    res.send(rows);
+    res.send(
+      rows.map(function (current) {
+        const { Senha, ...item } = current;
+        return item;
+      })
+    );
   } catch (error) {
     res.statusCode = 500;
     res.send(error);
@@ -37,15 +42,17 @@ router.get("/revendedor", async function (req, res, next) {
 router.get("/revendedor/:codigo", async function (req, res, next) {
   try {
     const revendedor = revendedorDAO.init();
-    const [[rows]] = await revendedor.findByCode(req.params.codigo);
+    const [[row]] = await revendedor.findByCode(req.params.codigo);
 
-    if (!rows) {
+    if (!row) {
       res.statusCode = 400;
       res.send("Revendedor não existe");
       return;
     }
 
-    res.send(rows);
+    const { Senha, ...item } = row;
+
+    res.send(item);
   } catch (error) {
     res.statusCode = 500;
     res.send(error);
@@ -78,7 +85,9 @@ router.post("/revendedor", async function (req, res, next) {
 
     const result = await revendedor.create();
 
-    const [[item]] = await revendedor.findByCode(result[0].insertId);
+    const [[{ Senha, ...item }]] = await revendedor.findByCode(
+      result[0].insertId
+    );
 
     res.statusCode = 201;
     res.send(item);
@@ -100,9 +109,9 @@ router.post("/revendedor/login", async function (req, res, next) {
   revendedor.Senha = md5(revendedor.Senha);
 
   try {
-    const [[rows]] = await revendedor.login(revendedor);
+    const [[item]] = await revendedor.login(revendedor);
 
-    if (!rows) {
+    if (!item) {
       res.statusCode = 401;
       res.send();
       return;
