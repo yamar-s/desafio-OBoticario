@@ -1,2 +1,0 @@
-• Rota para exibir o acumulado de cashback até o momento, essa rota irá consumir essa 
-informação de uma API externa disponibilizada pelo Boticário.

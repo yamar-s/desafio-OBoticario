@@ -11,7 +11,7 @@ describe("Testes das rotas de revendedor", () => {
   it("POST - Deve criar um novo revendedor", async () => {
     const res = await request(app).post("/revendedor").send({
       NomeCompleto: "Yasmin Martins dos Santos",
-      CPF: 66095620474,
+      CPF: 46977429828,
       Email: "yasminmartinssantos@gmail.com",
       Senha: "123456",
       Genero: "F",
@@ -59,7 +59,7 @@ describe("Testes das rotas de revendedor", () => {
   });
 
   it("GET - Deve retornar um revendedor especifico", async () => {
-    const res = await request(app).get("/revendedor/7");
+    const res = await request(app).get("/revendedor/1");
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual(
       expect.objectContaining({

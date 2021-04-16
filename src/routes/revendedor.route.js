@@ -73,8 +73,8 @@ router.post("/revendedor", async function (req, res, next) {
   }
 
   try {
-    const [[rows]] = await revendedor.findByCPF(req.body.CPF);
-    if (rows) {
+    const [[resultItem]] = await revendedor.findByCPF(req.body.CPF);
+    if (resultItem) {
       res.statusCode = 400;
       res.send("CPF Já cadastrado");
       return;
