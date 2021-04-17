@@ -3,7 +3,7 @@ const { merge } = require("ramda");
 const router = express.Router();
 const vendaDAO = require("../models/venda.model");
 const revendedorDAO = require("../models/revendedor.model");
-/* GET lista venda. */
+/* GET -Lista todas as vendas */
 router.get("/vendas", async function (req, res, next) {
   try {
     const vendas = vendaDAO.init();
@@ -15,6 +15,8 @@ router.get("/vendas", async function (req, res, next) {
     res.send(error);
   }
 });
+
+/* GET - Busca venda por Id */
 
 router.get("/vendas/:Id", async function (req, res, next) {
   try {
@@ -28,9 +30,12 @@ router.get("/vendas/:Id", async function (req, res, next) {
   }
 });
 
+/* POST - Cadastra nova venda */
+
 router.post("/vendas", async function (req, res, next) {
   const vendas = vendaDAO.init(req.body);
 
+  //Valida se os campos obrigatórios estão preenchidos
   if (
     !vendas.CPF ||
     !vendas.CodigoRevendedor ||
@@ -42,16 +47,18 @@ router.post("/vendas", async function (req, res, next) {
     return;
   }
 
+  //Verifica se o CPF cadastrado deve ter o pedido aprovado
   if (vendas.CPF === 15350946056) {
     vendas.Status = "Aprovado";
   }
 
   try {
-    const newVenda = { ...vendas, ...calcularValorVenda(vendas.Valor) };
+    const newVenda = { ...vendas, ...calcularValorCashBack(vendas.Valor) };
     const revendedor = await revendedorDAO.findByCode(
       newVenda.CodigoRevendedor
     );
 
+    //Verifica se o revendedor informado está cadastrado
     if (!revendedor.length || !revendedor[0].length) {
       res.statusCode = 403;
       res.send("Revendedor não existe");
@@ -69,9 +76,11 @@ router.post("/vendas", async function (req, res, next) {
   }
 });
 
-router.put("/vendas/editar", async function (req, res, next) {
+/* PUT - Edita uma venda existente - Identificada pelo Id*/
+router.put("/vendas", async function (req, res, next) {
   const vendas = vendaDAO.init(req.body);
 
+  //Valida se os campos obrigatórios estão preenchidos
   if (
     !vendas.Id ||
     !vendas.CodigoRevendedor ||
@@ -88,12 +97,14 @@ router.put("/vendas/editar", async function (req, res, next) {
   try {
     const [[dbVenda]] = await vendaDAO.findById(vendas.Id);
 
+    //Valida se Id está vinculado a uma venda existente
     if (!dbVenda) {
       res.statusCode = 403;
       res.send("Venda não existe");
       return;
     }
 
+    //Valida se a venda pode ser alterada - validação por status
     if (dbVenda.Status !== "EmValidacao") {
       res.statusCode = 403;
       res.send(
@@ -102,12 +113,13 @@ router.put("/vendas/editar", async function (req, res, next) {
       return;
     }
 
-    const newVenda = { ...vendas, ...calcularValorVenda(vendas.Valor) };
+    const newVenda = { ...vendas, ...calcularValorCashBack(vendas.Valor) };
 
     await newVenda.update(newVenda.Id, newVenda);
 
     const [[row]] = await newVenda.findById(newVenda.Id);
 
+    //Valida se a venda está cadastrada corretamente para exibição
     if (row) {
       res.statusCode = 200;
       res.send(row);
@@ -119,21 +131,7 @@ router.put("/vendas/editar", async function (req, res, next) {
   }
 });
 
-function calcularValorVenda(valor) {
-  if (valor <= 1000) {
-    return { ValorCashBack: percentage(10, valor), PorcentagemCashBack: 10.0 };
-  }
-
-  if (valor >= 1001 && valor <= 1500) {
-    return { ValorCashBack: percentage(15, valor), PorcentagemCashBack: 15.0 };
-  }
-
-  return { ValorCashBack: percentage(20, valor), PorcentagemCashBack: 20.0 };
-}
-
-function percentage(percent, total) {
-  return ((percent / 100) * total).toFixed(2);
-}
+/* DEL - Deleta uma venda existente - Identificada pelo Id*/
 
 router.delete("/vendas/excluir/:Id", async function (req, res, next) {
   const vendas = vendaDAO.init();
@@ -141,12 +139,14 @@ router.delete("/vendas/excluir/:Id", async function (req, res, next) {
   try {
     const [[row]] = await vendas.findById(req.params.Id);
 
+    //Valida se Id está vinculado a uma venda existente
     if (!row) {
       res.statusCode = 403;
       res.send("Venda não existe");
       return;
     }
 
+    //Valida se a venda pode ser excluida - validação por status
     if (row.Status === "Aprovado") {
       res.statusCode = 403;
       res.send("A venda não pode ser excluida. Status 'Aprovado'");
@@ -155,6 +155,7 @@ router.delete("/vendas/excluir/:Id", async function (req, res, next) {
 
     const [result] = await vendas.delete(row.Id);
 
+    //Valida se a exclusão da venda foi bem sucedida
     if (!result.affectedRows) {
       res.statusCode = 500;
       res.send("Erro ao excluir");
@@ -168,5 +169,37 @@ router.delete("/vendas/excluir/:Id", async function (req, res, next) {
     res.send(error);
   }
 });
+
+//Realiza o calculo do valor de cashBack de acordo com o valor da venda
+// A porcentagem é atribuida de acordo com os criterios de bonificação
+//Valores >= 0 && <= 1000 - 10% de cashback
+//Valores >= 1001 && <= 1500 - 15% de cashback
+//Valores > 1500 - 20% de cashback
+
+function calcularValorCashBack(valor) {
+  if (valor <= 1000) {
+    return {
+      ValorCashBack: ValorTotalCashBack(10, valor),
+      PorcentagemCashBack: 10.0,
+    };
+  }
+
+  if (valor >= 1001 && valor <= 1500) {
+    return {
+      ValorCashBack: ValorTotalCashBack(15, valor),
+      PorcentagemCashBack: 15.0,
+    };
+  }
+
+  return {
+    ValorCashBack: ValorTotalCashBack(20, valor),
+    PorcentagemCashBack: 20.0,
+  };
+}
+
+//Calcula o valor total do cashback de acordo com a porcentagem e o valor total da venda
+function ValorTotalCashBack(porcentagem, total) {
+  return ((porcentagem / 100) * total).toFixed(2);
+}
 
 module.exports = router;

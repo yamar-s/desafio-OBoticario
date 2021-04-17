@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "39cb4e17-91b4-453f-8d97-8cbf79c851ed",
+		"_postman_id": "4f373268-f6c3-4f53-b115-f32db03c209d",
 		"name": "Desafio-OBoticario",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -23,7 +23,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/vendas?v=1",
+							"raw": "http://localhost:3000/vendas",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -31,12 +31,6 @@
 							"port": "3000",
 							"path": [
 								"vendas"
-							],
-							"query": [
-								{
-									"key": "v",
-									"value": "1"
-								}
 							]
 						}
 					},
@@ -45,7 +39,7 @@
 				{
 					"name": "edit",
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -57,17 +51,17 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:3000/vendas/editar",
+							"raw": "http://localhost:3000/vendas",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "3000",
 							"path": [
-								"vendas",
-								"editar"
+								"vendas"
 							]
-						}
+						},
+						"description": "Edita uma venda existente - Identificada pelo Id"
 					},
 					"response": []
 				},
@@ -86,7 +80,8 @@
 							"path": [
 								"vendas"
 							]
-						}
+						},
+						"description": "Lista todas as vendas"
 					},
 					"response": []
 				},
@@ -96,7 +91,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:3000/vendas/excluir/103",
+							"raw": "http://localhost:3000/vendas/103",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -104,10 +99,10 @@
 							"port": "3000",
 							"path": [
 								"vendas",
-								"excluir",
 								"103"
 							]
-						}
+						},
+						"description": "Deleta uma venda existente - Identificada pelo Id"
 					},
 					"response": []
 				},
@@ -127,7 +122,8 @@
 								"vendas",
 								"102"
 							]
-						}
+						},
+						"description": "Busca venda por Id"
 					},
 					"response": []
 				}
@@ -152,7 +148,8 @@
 								"revendedor",
 								"2"
 							]
-						}
+						},
+						"description": "Busca revendedor por código"
 					},
 					"response": []
 				},
@@ -171,7 +168,8 @@
 							"path": [
 								"revendedor"
 							]
-						}
+						},
+						"description": "Lista todos os revendedores"
 					},
 					"response": []
 				},
@@ -179,14 +177,7 @@
 					"name": "cashBack",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "token",
-								"value": "ZXPURQOARHiMc6Y0flhRC1LVlZQVFRnm",
-								"type": "text",
-								"disabled": true
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "http://localhost:3000/revendedor/cashback/46977429828",
 							"protocol": "http",
@@ -199,7 +190,8 @@
 								"cashback",
 								"46977429828"
 							]
-						}
+						},
+						"description": "Recupera o cashback acumulado - Identificado pelo CPF"
 					},
 					"response": []
 				},
@@ -227,7 +219,8 @@
 							"path": [
 								"revendedor"
 							]
-						}
+						},
+						"description": "Cadastra novo revendedor"
 					},
 					"response": []
 				},
@@ -256,7 +249,8 @@
 								"revendedor",
 								"login"
 							]
-						}
+						},
+						"description": "Efetua login do revendedor"
 					},
 					"response": []
 				}

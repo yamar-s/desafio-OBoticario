@@ -3,6 +3,9 @@ const md5 = require("md5");
 const router = express.Router();
 const revendedorDAO = require("../models/revendedor.model");
 const axios = require("axios");
+
+/* GET - Recupera o cashback acumulado - Identificado pelo CPF */
+
 router.get("/revendedor/cashback/:CPF", async function (req, res, next) {
   try {
     const { data } = await axios.get(
@@ -22,6 +25,8 @@ router.get("/revendedor/cashback/:CPF", async function (req, res, next) {
   }
 });
 
+/* GET - Lista todos os revendedores */
+
 router.get("/revendedor", async function (req, res, next) {
   try {
     const revendedor = revendedorDAO.init();
@@ -39,11 +44,14 @@ router.get("/revendedor", async function (req, res, next) {
   }
 });
 
+/* GET - Busca revendedor por código */
+
 router.get("/revendedor/:codigo", async function (req, res, next) {
   try {
     const revendedor = revendedorDAO.init();
     const [[row]] = await revendedor.findByCode(req.params.codigo);
 
+    //Valida se o código informado corresponde a um revendedor cadastrado
     if (!row) {
       res.statusCode = 400;
       res.send("Revendedor não existe");
@@ -59,9 +67,12 @@ router.get("/revendedor/:codigo", async function (req, res, next) {
   }
 });
 
+/* POST - Cadastra novo revendedor */
+
 router.post("/revendedor", async function (req, res, next) {
   const revendedor = revendedorDAO.init(req.body);
 
+  //Valida se os campos obrigatórios estão preenchidos  
   if (
     !revendedor.Email ||
     !revendedor.Senha ||
@@ -74,6 +85,8 @@ router.post("/revendedor", async function (req, res, next) {
 
   try {
     const [[resultItem]] = await revendedor.findByCPF(req.body.CPF);
+
+    //Valida se o CPF informado já está cadastrado
     if (resultItem) {
       res.statusCode = 400;
       res.send("CPF Já cadastrado");
@@ -97,9 +110,12 @@ router.post("/revendedor", async function (req, res, next) {
   }
 });
 
+/* POST - Efetua login do revendedor */
+
 router.post("/revendedor/login", async function (req, res, next) {
   const revendedor = revendedorDAO.init(req.body);
 
+    //Valida se os campos obrigatórios estão preenchidos  
   if (!revendedor.Email || !revendedor.Senha) {
     res.statusCode = 400;
     res.send("Os campos de email e senha são obrigatórios");
@@ -111,6 +127,7 @@ router.post("/revendedor/login", async function (req, res, next) {
   try {
     const [[item]] = await revendedor.login(revendedor);
 
+      //Valida se as informações correspondem a um revendedor cadastrado 
     if (!item) {
       res.statusCode = 401;
       res.send();

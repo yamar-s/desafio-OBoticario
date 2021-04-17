@@ -1,7 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const vendasRoute = require("./src/routes/venda.route");
-const revendedorRoute = require("./src/routes/revendedor.route")
+const revendedorRoute = require("./src/routes/revendedor.route");
+
+
 // create express app
 const app = express();
 // Setup server port

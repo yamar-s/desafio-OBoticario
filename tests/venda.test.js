@@ -4,7 +4,7 @@ const request = require("supertest");
 describe("Testes das rotas de vendas", () => {
   it("POST - Deve criar uma venda com 10% de cashBack", async () => {
     const res = await request(app).post("/vendas").send({
-      CodigoRevendedor: 1,
+      CodigoRevendedor: 2,
       Valor: 50.0,
       CPF: 15350946056,
       Data: "2021-04-15",
@@ -21,7 +21,7 @@ describe("Testes das rotas de vendas", () => {
     const res = await request(app).post("/vendas").send({
       CodigoRevendedor: 1,
       Valor: 1400.0,
-      CPF: 40048873802,
+      CPF: 46977429828,
       Data: "2021-04-15",
     });
     expect(res.statusCode).toEqual(201);
@@ -65,7 +65,7 @@ describe("Testes das rotas de vendas", () => {
   });
 
   it("GET - Deve retornar uma venda especifica", async () => {
-    const res = await request(app).get("/vendas/1");
+    const res = await request(app).get("/vendas/210");
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual(
       expect.objectContaining({
@@ -80,13 +80,13 @@ describe("Testes das rotas de vendas", () => {
   });
 
   it("PUT - Deve editar a venda - status EmValidacao", async () => {
-    const res = await request(app).put("/vendas/editar").send({
-      Id: 3,
+    const res = await request(app).put("/vendas").send({
+      Id: 2,
       CodigoRevendedor: 1,
       Valor: 200,
       Status: "EmValidacao",
       Data: "2021-03-15T03:00:00.000",
-      CPF: 15350946056,
+      CPF: 46977429828,
     });
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual(
@@ -102,9 +102,9 @@ describe("Testes das rotas de vendas", () => {
   });
 
   it("PUT -Não deve editar a venda - status Aprovado", async () => {
-    const res = await request(app).put("/vendas/editar").send({
+    const res = await request(app).put("/vendas").send({
       Id: 1,
-      CodigoRevendedor: 1,
+      CodigoRevendedor: 2,
       Valor: 520,
       Status: "Aprovado",
       Data: "2021-03-15T03:00:00.000",
@@ -117,13 +117,13 @@ describe("Testes das rotas de vendas", () => {
   });
 
   it("DEL - Deve excluir uma venda especifica", async () => {
-    const res = await request(app).del("/vendas/excluir/2");
+    const res = await request(app).del("/vendas/excluir/212");
     expect(res.statusCode).toEqual(200);
     expect(res.text).toEqual("Excluido com sucesso");
   });
 
   it("DEL - Não eve excluir uma venda especifica - Status aprovado", async () => {
-    const res = await request(app).del("/vendas/excluir/1");
+    const res = await request(app).del("/vendas/excluir/210");
     expect(res.statusCode).toEqual(403);
     expect(res.text).toEqual(
       "A venda não pode ser excluida. Status 'Aprovado'"
