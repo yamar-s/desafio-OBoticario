@@ -1,6 +1,6 @@
 # OBoticario Backend Test
 
-The project was done using the [express generator template](https://expressjs.com/pt-br/starter/generator.html). The tests were developed using the Jest framework. The documentation was created with the swagger.
+The project was done using the [express generator template](https://expressjs.com/pt-br/starter/generator.html). The tests were developed using the Jest framework. The documentation was created with postman.
 
 ## Doc
 [Postman documentation](https://documenter.getpostman.com/view/8414349/TzJrDf1B)
