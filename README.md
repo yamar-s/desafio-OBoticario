@@ -8,6 +8,7 @@ Desafio-OBoticario.postman_collection -> JSON to import the postman collection.
 Desafio-OBoticario.sql -> SQL to import the database and structure.
 
 ## Development
+To the first time, run `npm install` to load all dependences.
 
 Run `npm run start` or `npm start` on terminal to initiate localhost server on port `3000`.
 
